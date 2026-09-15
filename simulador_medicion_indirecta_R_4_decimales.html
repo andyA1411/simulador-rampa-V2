@@ -1,0 +1,4887 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Simulador de Laboratorio - Cinemática
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            padding: 25px;
+
+            font-family:
+                'Segoe UI',
+                Tahoma,
+                Geneva,
+                Verdana,
+                sans-serif;
+
+            color: #eaf6ff;
+
+            background:
+                radial-gradient(
+                    circle at 15% 20%,
+                    rgba(0,180,255,.14),
+                    transparent 25%
+                ),
+
+                radial-gradient(
+                    circle at 85% 15%,
+                    rgba(0,255,200,.08),
+                    transparent 25%
+                ),
+
+                linear-gradient(
+                    135deg,
+                    #07131f,
+                    #0b2233 45%,
+                    #07131f
+                );
+
+            overflow-x: hidden;
+        }
+
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background-image:
+
+                linear-gradient(
+                    rgba(100,200,255,.035) 1px,
+                    transparent 1px
+                ),
+
+                linear-gradient(
+                    90deg,
+                    rgba(100,200,255,.035) 1px,
+                    transparent 1px
+                );
+
+            background-size: 40px 40px;
+
+            pointer-events: none;
+
+            z-index: 0;
+        }
+
+
+        .page {
+
+            position: relative;
+
+            z-index: 1;
+
+            max-width: 1300px;
+
+            margin: auto;
+        }
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        header {
+
+            text-align: center;
+
+            margin-bottom: 25px;
+        }
+
+
+        .lab-icon {
+
+            font-size: 40px;
+
+            margin-bottom: 5px;
+        }
+
+
+        h1 {
+
+            margin: 0;
+
+            color: #7edcff;
+
+            font-size: 31px;
+
+            text-shadow:
+                0 0 18px
+                rgba(0,190,255,.45);
+        }
+
+
+        .subtitle {
+
+            color: #b7d5e8;
+
+            margin-top: 8px;
+
+            font-size: 15px;
+        }
+
+
+        /* =====================================================
+           LAYOUT
+        ===================================================== */
+
+        .main-layout {
+
+            display: flex;
+
+            gap: 20px;
+
+            align-items: stretch;
+        }
+
+
+        /* =====================================================
+           CONTROLES
+        ===================================================== */
+
+        .controls {
+
+            width: 320px;
+
+            flex-shrink: 0;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(19,48,66,.95),
+                    rgba(7,24,36,.96)
+                );
+
+            border:
+                1px solid
+                rgba(99,205,255,.25);
+
+            border-radius: 16px;
+
+            padding: 20px;
+
+            box-shadow:
+                0 12px 35px
+                rgba(0,0,0,.35);
+        }
+
+
+        .controls h3 {
+
+            margin:
+                0 0 15px 0;
+
+            color: #82ddff;
+        }
+
+
+        .section-line {
+
+            height: 1px;
+
+            margin-bottom: 17px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(85,205,255,.4),
+                    transparent
+                );
+        }
+
+
+        .control-group {
+
+            background:
+                rgba(255,255,255,.035);
+
+            padding: 12px;
+
+            border-radius: 10px;
+
+            margin-bottom: 12px;
+
+            border:
+                1px solid
+                rgba(255,255,255,.06);
+        }
+
+
+        label {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            font-weight: 600;
+
+            color: #dceefa;
+
+            margin-bottom: 9px;
+
+            font-size: 14px;
+        }
+
+
+        label span {
+
+            color: #72d9ff;
+
+            font-weight: bold;
+        }
+
+
+        input[type="range"] {
+
+            width: 100%;
+
+            accent-color: #20bfff;
+
+            cursor: pointer;
+        }
+
+
+        /* =====================================================
+           FRICCIÓN
+        ===================================================== */
+
+        .friction-box {
+
+            padding: 13px;
+
+            margin-bottom: 12px;
+
+            border-radius: 10px;
+
+            background:
+                rgba(0,145,190,.08);
+
+            border:
+                1px solid
+                rgba(50,200,255,.18);
+        }
+
+
+        .friction-title {
+
+            color: #82ddff;
+
+            font-weight: bold;
+
+            margin-bottom: 11px;
+        }
+
+
+        .friction-toggle {
+
+            display: flex;
+
+            justify-content: flex-start;
+
+            gap: 9px;
+
+            cursor: pointer;
+
+            margin-bottom: 12px;
+        }
+
+
+        .friction-toggle input {
+
+            width: 17px;
+
+            height: 17px;
+
+            accent-color: #20c5ff;
+        }
+
+
+        #mu_container {
+
+            transition: .25s;
+        }
+
+
+        #mu_container.disabled {
+
+            opacity: .35;
+
+            pointer-events: none;
+        }
+
+
+        /* =====================================================
+           BOTONES
+        ===================================================== */
+
+        button {
+
+            width: 100%;
+
+            border: none;
+
+            padding: 12px;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #008bd2,
+                    #00b9ed
+                );
+
+            box-shadow:
+                0 5px 18px
+                rgba(0,174,239,.25);
+
+            transition: .2s;
+
+            margin-top: 7px;
+        }
+
+
+        button:hover {
+
+            transform:
+                translateY(-2px);
+
+            filter:
+                brightness(1.1);
+        }
+
+
+        .danger-button {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #a93245,
+                    #e34c61
+                );
+        }
+
+
+        .secondary-button {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #31546a,
+                    #46758d
+                );
+        }
+
+
+        /* =====================================================
+           RESULTADOS
+        ===================================================== */
+
+        .results {
+
+            margin-top: 14px;
+
+            padding: 13px;
+
+            border-radius: 10px;
+
+            background:
+                rgba(0,126,174,.12);
+
+            border-left:
+                4px solid #16c5ff;
+
+            font-size: 13px;
+        }
+
+
+        .results strong {
+
+            color: #7edcff;
+        }
+
+
+        .results p {
+
+            margin: 7px 0;
+
+            color: #cfe6f2;
+        }
+
+
+        .highlight {
+
+            color: #55d9ff !important;
+
+            font-weight: bold;
+        }
+
+
+        /* =====================================================
+           CANVAS
+        ===================================================== */
+
+        .canvas-container {
+
+            flex: 1;
+
+            min-width: 0;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(18,45,61,.96),
+                    rgba(5,20,31,.98)
+                );
+
+            padding: 15px;
+
+            border-radius: 16px;
+
+            border:
+                1px solid
+                rgba(100,210,255,.25);
+
+            box-shadow:
+                0 12px 35px
+                rgba(0,0,0,.35);
+        }
+
+
+        #simCanvas {
+
+            width: 100%;
+
+            height: auto;
+
+            display: block;
+
+            background: #081722;
+
+            border-radius: 10px;
+
+            border:
+                1px solid
+                rgba(96,210,255,.25);
+
+            cursor: crosshair;
+        }
+
+
+        /* =====================================================
+           TOOLTIP
+        ===================================================== */
+
+        #impactTooltip {
+
+            position: fixed;
+
+            display: none;
+
+            z-index: 100;
+
+            width: 245px;
+
+            padding: 13px;
+
+            border-radius: 10px;
+
+            background:
+                rgba(5,22,32,.96);
+
+            border:
+                1px solid
+                rgba(70,205,255,.5);
+
+            box-shadow:
+                0 10px 35px
+                rgba(0,0,0,.5);
+
+            pointer-events: none;
+
+            font-size: 13px;
+
+            backdrop-filter: blur(8px);
+        }
+
+
+        .tooltip-title {
+
+            color: #ff8290;
+
+            font-weight: bold;
+
+            font-size: 15px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .tooltip-row {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            padding: 3px 0;
+
+            color: #cde5f0;
+        }
+
+
+        .tooltip-row span:last-child {
+
+            color: #69d9ff;
+
+            font-weight: bold;
+        }
+
+
+        /* =====================================================
+           DATOS
+        ===================================================== */
+
+        .data-section {
+
+            margin-top: 22px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(18,45,61,.96),
+                    rgba(5,20,31,.98)
+                );
+
+            padding: 18px;
+
+            border-radius: 16px;
+
+            border:
+                1px solid
+                rgba(100,210,255,.25);
+
+            box-shadow:
+                0 12px 35px
+                rgba(0,0,0,.35);
+        }
+
+
+        .section-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .section-header h2 {
+
+            margin: 0;
+
+            color: #7edcff;
+
+            font-size: 20px;
+        }
+
+
+        .small-button {
+
+            width: auto;
+
+            margin: 0;
+
+            padding:
+                8px 14px;
+
+            font-size: 13px;
+        }
+
+
+        .table-wrapper {
+
+            width: 100%;
+
+            overflow-x: auto;
+        }
+
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 850px;
+
+            font-size: 13px;
+        }
+
+
+        th {
+
+            padding: 10px;
+
+            text-align: center;
+
+            background:
+                rgba(0,150,210,.15);
+
+            color: #76dfff;
+
+            border-bottom:
+                1px solid
+                rgba(90,210,255,.25);
+
+            white-space: nowrap;
+        }
+
+
+        td {
+
+            padding: 9px;
+
+            text-align: center;
+
+            color: #d1e7f0;
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,.06);
+        }
+
+
+        tr:hover td {
+
+            background:
+                rgba(50,190,230,.06);
+        }
+
+
+        .empty-table {
+
+            text-align: center;
+
+            color: #7694a2;
+
+            padding: 25px;
+        }
+
+
+        /* =====================================================
+           GRÁFICA
+        ===================================================== */
+
+        .graph-section {
+
+            margin-top: 22px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(18,45,61,.96),
+                    rgba(5,20,31,.98)
+                );
+
+            padding: 18px;
+
+            border-radius: 16px;
+
+            border:
+                1px solid
+                rgba(100,210,255,.25);
+
+            box-shadow:
+                0 12px 35px
+                rgba(0,0,0,.35);
+        }
+
+
+        .graph-controls {
+
+            display: flex;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+
+            align-items: end;
+
+            margin-bottom: 15px;
+        }
+
+
+        .select-group {
+
+            flex: 1;
+
+            min-width: 200px;
+        }
+
+
+        .select-group label {
+
+            display: block;
+
+            margin-bottom: 6px;
+        }
+
+
+        select {
+
+            width: 100%;
+
+            padding: 9px;
+
+            border-radius: 7px;
+
+            border:
+                1px solid
+                rgba(100,210,255,.3);
+
+            background: #102b3a;
+
+            color: #eaf6ff;
+
+            cursor: pointer;
+        }
+
+
+        #graphCanvas {
+
+            width: 100%;
+
+            height: auto;
+
+            background:
+                #071722;
+
+            border-radius: 9px;
+
+            border:
+                1px solid
+                rgba(100,210,255,.2);
+        }
+
+
+        .no-data {
+
+            padding: 30px;
+
+            text-align: center;
+
+            color: #7694a2;
+        }
+
+
+        /* =====================================================
+           INFO
+        ===================================================== */
+
+        .info-bar {
+
+            margin-top: 18px;
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 25px;
+
+            flex-wrap: wrap;
+
+            color: #91b5c8;
+
+            font-size: 13px;
+        }
+
+
+        .indicator {
+
+            width: 8px;
+
+            height: 8px;
+
+            display: inline-block;
+
+            border-radius: 50%;
+
+            background: #25d7ff;
+
+            box-shadow:
+                0 0 10px
+                #25d7ff;
+        }
+
+
+        @media(max-width:900px) {
+
+            body {
+                padding: 12px;
+            }
+
+            .main-layout {
+                flex-direction: column;
+            }
+
+            .controls {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header>
+
+        <div class="lab-icon">
+            ⚗️
+        </div>
+
+        <h1>
+            Simulador: Medición Indirecta
+        </h1>
+
+        <div class="subtitle">
+
+            Conservación de energía ·
+            Rotación + Traslación ·
+            Movimiento Parabólico
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         SIMULADOR
+    ====================================================== -->
+
+    <div class="main-layout">
+
+
+        <!-- =================================================
+             CONTROLES
+        ================================================== -->
+
+        <div class="controls">
+
+
+            <h3>
+                ⚙ Parámetros del Sistema
+            </h3>
+
+
+            <div class="section-line"></div>
+
+
+            <!-- ALTURA RAMPA -->
+
+            <div class="control-group">
+
+                <label>
+
+                    Altura de la rampa (h)
+
+                    <span id="h_val">
+                        0.20 m
+                    </span>
+
+                </label>
+
+
+                <input
+                    type="range"
+                    id="h_input"
+                    min="0.05"
+                    max="0.50"
+                    step="0.01"
+                    value="0.20"
+                >
+
+            </div>
+
+
+            <!-- LONGITUD -->
+
+            <div class="control-group">
+
+                <label>
+
+                    Longitud de la base (L)
+
+                    <span id="l_val">
+                        0.30 m
+                    </span>
+
+                </label>
+
+
+                <input
+                    type="range"
+                    id="l_input"
+                    min="0.10"
+                    max="0.60"
+                    step="0.01"
+                    value="0.30"
+                >
+
+            </div>
+
+
+            <!-- ALTURA MESA -->
+
+            <div class="control-group">
+
+                <label>
+
+                    Altura de la mesa (H)
+
+                    <span id="H_val">
+                        0.80 m
+                    </span>
+
+                </label>
+
+
+                <input
+                    type="range"
+                    id="H_input"
+                    min="0.50"
+                    max="1.50"
+                    step="0.01"
+                    value="0.80"
+                >
+
+            </div>
+
+
+            <!-- FRICCIÓN -->
+
+            <div class="friction-box">
+
+
+                <div class="friction-title">
+
+                    ⚙ Fricción cinética
+
+                </div>
+
+
+                <label class="friction-toggle">
+
+                    <input
+                        type="checkbox"
+                        id="friction_input"
+                    >
+
+                    <span>
+                        Activar fricción
+                    </span>
+
+                </label>
+
+
+                <div
+                    id="mu_container"
+                    class="disabled"
+                >
+
+                    <label>
+
+                        Coeficiente μₖ
+
+                        <span id="mu_val">
+                            0.15
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        type="range"
+                        id="mu_input"
+                        min="0"
+                        max="0.50"
+                        step="0.01"
+                        value="0.15"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- BOTÓN LANZAMIENTO -->
+
+            <button
+                id="btn_simular"
+                onclick="iniciarSimulacion()"
+            >
+
+                ▶ Iniciar Lanzamiento
+
+            </button>
+
+
+            <!-- BORRAR -->
+
+            <button
+                class="danger-button"
+                onclick="borrarDatos()"
+            >
+
+                🗑 Borrar impactos y datos
+
+            </button>
+
+
+            <!-- RESULTADOS -->
+
+            <div class="results">
+
+                <strong>
+                    Resultados Teóricos
+                </strong>
+
+
+                <p>
+                    Gravedad:
+                    <b>9.81 m/s²</b>
+                </p>
+
+
+                <p>
+                    Velocidad de salida:
+                    <span id="res_v">0.00</span>
+                    m/s
+                </p>
+
+
+                <p>
+                    Tiempo de vuelo:
+                    <span id="res_t">0.00</span>
+                    s
+                </p>
+
+
+                <p>
+                    Ángulo promedio:
+                    <span id="res_theta">0.00</span>
+                    °
+                </p>
+
+
+                <p>
+                    Longitud de rampa S:
+                    <span id="res_S">0.00</span>
+                    m
+                </p>
+
+
+                <p class="highlight">
+
+                    Alcance horizontal R:
+                    <span id="res_R">0.00</span>
+                    m
+
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =================================================
+             CANVAS
+        ================================================== -->
+
+        <div class="canvas-container">
+
+            <canvas
+                id="simCanvas"
+                width="850"
+                height="500"
+            ></canvas>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         TABLA
+    ====================================================== -->
+
+    <div class="data-section">
+
+
+        <div class="section-header">
+
+            <h2>
+                📊 Datos experimentales
+            </h2>
+
+
+            <button
+                class="secondary-button small-button"
+                onclick="borrarDatos()"
+            >
+
+                Limpiar tabla
+
+            </button>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>H (m)</th>
+
+                        <th>h (m)</th>
+
+                        <th>L (m)</th>
+
+                        <th>μₖ</th>
+
+                        <th>Fricción</th>
+
+                        <th>θprom (°)</th>
+
+                        <th>S (m)</th>
+
+                        <th>v₀ (m/s)</th>
+
+                        <th>t (s)</th>
+
+                        <th>R (m)</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="dataBody">
+
+                    <tr>
+
+                        <td
+                            colspan="11"
+                            class="empty-table"
+                        >
+
+                            Todavía no hay lanzamientos.
+                            Realiza una simulación para
+                            agregar datos.
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         GRÁFICA
+    ====================================================== -->
+
+    <div class="graph-section">
+
+
+        <div class="section-header">
+
+            <h2>
+                📈 Gráfica de datos
+            </h2>
+
+        </div>
+
+
+        <div class="graph-controls">
+
+
+            <div class="select-group">
+
+                <label>
+                    Variable independiente (X)
+                </label>
+
+
+                <select id="xVariable">
+
+                    <option value="H">
+                        Altura de la mesa H
+                    </option>
+
+                    <option value="h">
+                        Altura de la rampa h
+                    </option>
+
+                    <option value="L">
+                        Longitud de la base L
+                    </option>
+
+                    <option value="mu">
+                        Coeficiente de fricción μₖ
+                    </option>
+
+                    <option value="theta">
+                        Ángulo promedio θprom
+                    </option>
+
+                    <option value="S">
+                        Longitud de rampa S
+                    </option>
+
+                    <option value="v">
+                        Velocidad de salida v₀
+                    </option>
+
+                    <option value="t">
+                        Tiempo de vuelo t
+                    </option>
+
+                    <option value="R">
+                        Alcance horizontal R
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="select-group">
+
+                <label>
+                    Variable dependiente (Y)
+                </label>
+
+
+                <select id="yVariable">
+
+                    <option value="R">
+                        Alcance horizontal R
+                    </option>
+
+                    <option value="v">
+                        Velocidad de salida v₀
+                    </option>
+
+                    <option value="t">
+                        Tiempo de vuelo t
+                    </option>
+
+                    <option value="H">
+                        Altura de la mesa H
+                    </option>
+
+                    <option value="h">
+                        Altura de la rampa h
+                    </option>
+
+                    <option value="L">
+                        Longitud de la base L
+                    </option>
+
+                    <option value="mu">
+                        Coeficiente de fricción μₖ
+                    </option>
+
+                    <option value="theta">
+                        Ángulo promedio θprom
+                    </option>
+
+                    <option value="S">
+                        Longitud de rampa S
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button
+                class="small-button"
+                onclick="dibujarGrafica()"
+            >
+
+                📈 Graficar datos
+
+            </button>
+
+
+        </div>
+
+
+        <canvas
+            id="graphCanvas"
+            width="1100"
+            height="500"
+        ></canvas>
+
+
+        <div
+            id="graphMessage"
+            class="no-data"
+        >
+
+            Realiza varios lanzamientos y luego
+            presiona "Graficar datos".
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         INFO
+    ====================================================== -->
+
+    <div class="info-bar">
+
+        <div>
+            <span class="indicator"></span>
+            Sistema preparado
+        </div>
+
+        <div>
+            ⚙ Rampa curva
+        </div>
+
+        <div>
+            🧲 Fricción controlable
+        </div>
+
+        <div>
+            📌 Impactos acumulativos
+        </div>
+
+        <div>
+            📊 Registro experimental
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     TOOLTIP
+========================================================== -->
+
+<div id="impactTooltip"></div>
+
+
+<script>
+
+
+// ============================================================
+// CANVAS PRINCIPAL
+// ============================================================
+
+const canvas =
+    document.getElementById("simCanvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+
+const graphCanvas =
+    document.getElementById("graphCanvas");
+
+const graphCtx =
+    graphCanvas.getContext("2d");
+
+
+// ============================================================
+// ELEMENTOS
+// ============================================================
+
+const inputs = {
+
+    h:
+        document.getElementById("h_input"),
+
+    L:
+        document.getElementById("l_input"),
+
+    H:
+        document.getElementById("H_input"),
+
+    friction:
+        document.getElementById("friction_input"),
+
+    mu:
+        document.getElementById("mu_input")
+
+};
+
+
+const displays = {
+
+    h:
+        document.getElementById("h_val"),
+
+    L:
+        document.getElementById("l_val"),
+
+    H:
+        document.getElementById("H_val"),
+
+    mu:
+        document.getElementById("mu_val"),
+
+    v:
+        document.getElementById("res_v"),
+
+    t:
+        document.getElementById("res_t"),
+
+    R:
+        document.getElementById("res_R"),
+
+    theta:
+        document.getElementById("res_theta"),
+
+    S:
+        document.getElementById("res_S")
+
+};
+
+
+const tooltip =
+    document.getElementById(
+        "impactTooltip"
+    );
+
+
+// ============================================================
+// CONSTANTES
+// ============================================================
+
+const g = 9.81;
+
+
+// ============================================================
+// ESTADO
+// ============================================================
+
+let isAnimating = false;
+
+let phase = 0;
+
+let time = 0;
+
+let currentScale = 300;
+
+let currentRamp = null;
+
+let impacts = [];
+
+
+// ============================================================
+// UTILIDADES
+// ============================================================
+
+function getValues() {
+
+    return {
+
+        h:
+            parseFloat(inputs.h.value),
+
+        L:
+            parseFloat(inputs.L.value),
+
+        H:
+            parseFloat(inputs.H.value),
+
+        mu:
+            parseFloat(inputs.mu.value),
+
+        friction:
+            inputs.friction.checked
+
+    };
+
+}
+
+
+// ============================================================
+// LONGITUD DE RAMPA
+// ============================================================
+
+function getRampLength() {
+
+    const values =
+        getValues();
+
+    /*
+     * Para la curva cuadrática utilizada,
+     * aproximamos su longitud mediante
+     * pequeños segmentos.
+     */
+
+    const points =
+        100;
+
+
+    let length = 0;
+
+
+    let previous = {
+
+        x: 0,
+
+        y: values.h
+
+    };
+
+
+    for (
+        let i = 1;
+        i <= points;
+        i++
+    ) {
+
+        const t =
+            i / points;
+
+
+        /*
+         * Misma geometría relativa
+         * que la rampa dibujada.
+         */
+
+        const x =
+            values.L * t;
+
+
+        const y =
+            values.h
+            * Math.pow(
+                1 - t,
+                2
+            );
+
+
+        const dx =
+            x -
+            previous.x;
+
+
+        const dy =
+            y -
+            previous.y;
+
+
+        length +=
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+
+        previous = {
+
+            x,
+            y
+
+        };
+
+    }
+
+
+    return length;
+
+}
+
+
+// ============================================================
+// ÁNGULO PROMEDIO
+// ============================================================
+
+function getAverageAngle() {
+
+    const values =
+        getValues();
+
+
+    return Math.atan2(
+        values.h,
+        values.L
+    );
+
+}
+
+
+// ============================================================
+// MODELO MATEMÁTICO
+// ============================================================
+
+function calcularTeoria() {
+
+    const values =
+        getValues();
+
+
+    const S =
+        getRampLength();
+
+
+    const thetaProm =
+        getAverageAngle();
+
+
+    /*
+     * ========================================================
+     *
+     * MODELO PROPORCIONADO POR EL USUARIO
+     *
+     * R = sqrt[
+     *
+     *       (20H/7)
+     *
+     *       (h - μk S cos(theta_prom))
+     *
+     * ]
+     *
+     * ========================================================
+     */
+
+
+    let alturaEfectiva =
+        values.h;
+
+
+    if (
+        values.friction
+    ) {
+
+        alturaEfectiva =
+
+            values.h
+            -
+            values.mu
+            *
+            S
+            *
+            Math.cos(
+                thetaProm
+            );
+
+    }
+
+
+    /*
+     * Evitar raíz negativa.
+     */
+
+    alturaEfectiva =
+        Math.max(
+            0,
+            alturaEfectiva
+        );
+
+
+    const R =
+
+        Math.sqrt(
+
+            (
+                20
+                *
+                values.H
+                /
+                7
+            )
+            *
+            alturaEfectiva
+
+        );
+
+
+    /*
+     * Velocidad equivalente
+     * según el modelo.
+     */
+
+    const v0 =
+
+        Math.sqrt(
+
+            (
+                10
+                /
+                7
+            )
+            *
+            g
+            *
+            alturaEfectiva
+
+        );
+
+
+    /*
+     * Tiempo de vuelo.
+     */
+
+    const t =
+
+        Math.sqrt(
+
+            (
+                2
+                *
+                values.H
+            )
+            /
+            g
+
+        );
+
+
+    return {
+
+        ...values,
+
+        S,
+
+        thetaProm,
+
+        thetaDegrees:
+            thetaProm
+            *
+            180
+            /
+            Math.PI,
+
+        alturaEfectiva,
+
+        R,
+
+        v0,
+
+        t
+
+    };
+
+}
+
+
+// ============================================================
+// ESCALA DINÁMICA
+// ============================================================
+
+function calculateScale(theory) {
+
+    /*
+     * Queremos que SIEMPRE quepa:
+     *
+     * H + h
+     *
+     * y también:
+     *
+     * L + R
+     */
+
+    const verticalAvailable =
+        canvas.height - 90;
+
+
+    const horizontalAvailable =
+        canvas.width - 145;
+
+
+    const physicalHeight =
+        theory.H
+        +
+        theory.h
+        +
+        0.10;
+
+
+    const physicalWidth =
+        theory.L
+        +
+        theory.R
+        +
+        0.20;
+
+
+    const verticalScale =
+        verticalAvailable
+        /
+        physicalHeight;
+
+
+    const horizontalScale =
+        horizontalAvailable
+        /
+        physicalWidth;
+
+
+    /*
+     * Utilizamos la menor escala.
+     */
+
+    currentScale =
+        Math.min(
+            verticalScale,
+            horizontalScale
+        );
+
+
+    /*
+     * Límites razonables.
+     */
+
+    currentScale =
+        Math.max(
+            100,
+            Math.min(
+                currentScale,
+                430
+            )
+        );
+
+}
+
+
+// ============================================================
+// GEOMETRÍA
+// ============================================================
+
+function getRampPoints() {
+
+    const theory =
+        calcularTeoria();
+
+
+    calculateScale(
+        theory
+    );
+
+
+    const scale =
+        currentScale;
+
+
+    const groundY =
+        canvas.height - 55;
+
+
+    const tableY =
+        groundY
+        -
+        theory.H
+        *
+        scale;
+
+
+    const startX =
+        105;
+
+
+    const startY =
+        tableY
+        -
+        theory.h
+        *
+        scale;
+
+
+    const endX =
+        startX
+        +
+        theory.L
+        *
+        scale;
+
+
+    const endY =
+        tableY;
+
+
+    const controlX =
+        startX
+        +
+        theory.L
+        *
+        scale
+        *
+        0.48;
+
+
+    const controlY =
+        tableY
+        -
+        theory.h
+        *
+        scale
+        *
+        0.18;
+
+
+    return {
+
+        startX,
+
+        startY,
+
+        controlX,
+
+        controlY,
+
+        endX,
+
+        endY,
+
+        tableY,
+
+        groundY,
+
+        scale,
+
+        theory
+
+    };
+
+}
+
+
+// ============================================================
+// BEZIER
+// ============================================================
+
+function getBezierPoint(
+    t,
+    ramp
+) {
+
+    const x =
+
+        Math.pow(
+            1 - t,
+            2
+        )
+        *
+        ramp.startX
+
+        +
+
+        2
+        *
+        (1 - t)
+        *
+        t
+        *
+        ramp.controlX
+
+        +
+
+        Math.pow(
+            t,
+            2
+        )
+        *
+        ramp.endX;
+
+
+    const y =
+
+        Math.pow(
+            1 - t,
+            2
+        )
+        *
+        ramp.startY
+
+        +
+
+        2
+        *
+        (1 - t)
+        *
+        t
+        *
+        ramp.controlY
+
+        +
+
+        Math.pow(
+            t,
+            2
+        )
+        *
+        ramp.endY;
+
+
+    return {
+
+        x,
+
+        y
+
+    };
+
+}
+
+
+// ============================================================
+// ACTUALIZAR RESULTADOS
+// ============================================================
+
+function updateDisplays() {
+
+    displays.h.innerText =
+        parseFloat(
+            inputs.h.value
+        ).toFixed(2)
+        +
+        " m";
+
+
+    displays.L.innerText =
+        parseFloat(
+            inputs.L.value
+        ).toFixed(2)
+        +
+        " m";
+
+
+    displays.H.innerText =
+        parseFloat(
+            inputs.H.value
+        ).toFixed(2)
+        +
+        " m";
+
+
+    displays.mu.innerText =
+        parseFloat(
+            inputs.mu.value
+        ).toFixed(2);
+
+
+    const theory =
+        calcularTeoria();
+
+
+    displays.v.innerText =
+        theory.v0.toFixed(2);
+
+
+    displays.t.innerText =
+        theory.t.toFixed(2);
+
+
+    displays.R.innerText =
+        theory.R.toFixed(4);
+
+
+    displays.theta.innerText =
+        theory.thetaDegrees.toFixed(2);
+
+
+    displays.S.innerText =
+        theory.S.toFixed(3);
+
+
+    if (
+        !isAnimating
+    ) {
+
+        drawScene();
+
+    }
+
+}
+
+
+// ============================================================
+// FONDO
+// ============================================================
+
+function drawBackground() {
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            canvas.height
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#081d2b"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#06131d"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    /*
+     * Cuadrícula
+     */
+
+    ctx.strokeStyle =
+        "rgba(80,180,220,.07)";
+
+
+    ctx.lineWidth = 1;
+
+
+    for (
+        let x = 0;
+        x < canvas.width;
+        x += 55
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            0
+        );
+
+        ctx.lineTo(
+            x,
+            canvas.height
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    for (
+        let y = 0;
+        y < canvas.height;
+        y += 55
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            canvas.width,
+            y
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    /*
+     * Panel superior
+     */
+
+    ctx.fillStyle =
+        "rgba(50,190,230,.07)";
+
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        75
+    );
+
+
+    /*
+     * Luces superiores
+     */
+
+    [
+        100,
+        280,
+        460,
+        640,
+        800
+    ]
+    .forEach(
+        x => {
+
+            ctx.fillStyle =
+                "#42d9ff";
+
+            ctx.shadowColor =
+                "#42d9ff";
+
+            ctx.shadowBlur = 14;
+
+            ctx.fillRect(
+                x,
+                20,
+                65,
+                4
+            );
+
+            ctx.shadowBlur = 0;
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// SUELO
+// ============================================================
+
+function drawGround(
+    ramp
+) {
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            ramp.groundY,
+            0,
+            canvas.height
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#1a3542"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#07141d"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        0,
+        ramp.groundY,
+        canvas.width,
+        canvas.height
+        -
+        ramp.groundY
+    );
+
+
+    ctx.strokeStyle =
+        "#4a9bb5";
+
+
+    ctx.lineWidth = 2;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        ramp.groundY
+    );
+
+    ctx.lineTo(
+        canvas.width,
+        ramp.groundY
+    );
+
+    ctx.stroke();
+
+}
+
+
+// ============================================================
+// MESA
+// ============================================================
+
+function drawTable(
+    ramp
+) {
+
+    /*
+     * IMPORTANTE:
+     *
+     * La mesa termina exactamente
+     * en endX.
+     */
+
+    const tableWidth =
+        ramp.endX
+        -
+        70;
+
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            ramp.tableY,
+            0,
+            ramp.groundY
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#55727f"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#263c46"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        70,
+        ramp.tableY,
+        tableWidth,
+        ramp.groundY
+        -
+        ramp.tableY
+    );
+
+
+    ctx.strokeStyle =
+        "#789aa8";
+
+
+    ctx.lineWidth = 2;
+
+
+    ctx.strokeRect(
+        70,
+        ramp.tableY,
+        tableWidth,
+        ramp.groundY
+        -
+        ramp.tableY
+    );
+
+
+    /*
+     * Superficie
+     */
+
+    ctx.fillStyle =
+        "#7599a8";
+
+
+    ctx.fillRect(
+        70,
+        ramp.tableY,
+        tableWidth,
+        7
+    );
+
+
+    /*
+     * Patas
+     */
+
+    ctx.fillStyle =
+        "#20343d";
+
+
+    ctx.fillRect(
+        95,
+        ramp.groundY,
+        18,
+        80
+    );
+
+
+    if (
+        tableWidth > 120
+    ) {
+
+        ctx.fillRect(
+            ramp.endX - 43,
+            ramp.groundY,
+            18,
+            80
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// RAMPA
+// ============================================================
+
+function drawRamp(
+    ramp
+) {
+
+    ctx.save();
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        ramp.startX,
+        ramp.startY
+    );
+
+
+    ctx.quadraticCurveTo(
+        ramp.controlX,
+        ramp.controlY,
+        ramp.endX,
+        ramp.endY
+    );
+
+
+    ctx.lineTo(
+        ramp.endX,
+        ramp.tableY
+    );
+
+
+    ctx.lineTo(
+        ramp.startX,
+        ramp.tableY
+    );
+
+
+    ctx.closePath();
+
+
+    const gradient =
+        ctx.createLinearGradient(
+            ramp.startX,
+            ramp.startY,
+            ramp.endX,
+            ramp.endY
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#566f7b"
+    );
+
+
+    gradient.addColorStop(
+        .5,
+        "#354d58"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#223740"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.shadowColor =
+        "rgba(0,0,0,.6)";
+
+
+    ctx.shadowBlur = 14;
+
+
+    ctx.fill();
+
+
+    ctx.shadowBlur = 0;
+
+
+    /*
+     * Borde de la rampa
+     */
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        ramp.startX,
+        ramp.startY
+    );
+
+
+    ctx.quadraticCurveTo(
+        ramp.controlX,
+        ramp.controlY,
+        ramp.endX,
+        ramp.endY
+    );
+
+
+    ctx.strokeStyle =
+        "#7ddfff";
+
+
+    ctx.lineWidth = 4;
+
+
+    ctx.shadowColor =
+        "rgba(60,210,255,.45)";
+
+
+    ctx.shadowBlur = 8;
+
+
+    ctx.stroke();
+
+
+    ctx.shadowBlur = 0;
+
+
+    /*
+     * Punto de salida
+     */
+
+    ctx.fillStyle =
+        "#35dcff";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        ramp.endX,
+        ramp.endY,
+        4,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.restore();
+
+}
+
+
+// ============================================================
+// CANICA
+// ============================================================
+
+function drawMarble(
+    x,
+    y
+) {
+
+    const r = 9;
+
+
+    /*
+     * Sombra
+     */
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        x + 3,
+        y + r + 4,
+        r * .85,
+        3,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fillStyle =
+        "rgba(0,0,0,.4)";
+
+
+    ctx.fill();
+
+
+    /*
+     * Canica
+     */
+
+    const gradient =
+        ctx.createRadialGradient(
+            x - 3,
+            y - 4,
+            2,
+            x,
+            y,
+            r
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#ffffff"
+    );
+
+
+    gradient.addColorStop(
+        .2,
+        "#65dcff"
+    );
+
+
+    gradient.addColorStop(
+        .7,
+        "#008fd0"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#00517b"
+    );
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        x,
+        y,
+        r,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.shadowColor =
+        "rgba(50,210,255,.65)";
+
+
+    ctx.shadowBlur = 12;
+
+
+    ctx.fill();
+
+
+    ctx.shadowBlur = 0;
+
+
+    ctx.strokeStyle =
+        "#9ceaff";
+
+
+    ctx.stroke();
+
+}
+
+
+// ============================================================
+// TRAYECTORIA
+// ============================================================
+
+function drawTrajectory(
+    ramp
+) {
+
+    const theory =
+        ramp.theory;
+
+
+    const edgeX =
+        ramp.endX;
+
+
+    const edgeY =
+        ramp.endY;
+
+
+    ctx.save();
+
+
+    ctx.beginPath();
+
+
+    ctx.setLineDash([
+        7,
+        7
+    ]);
+
+
+    ctx.strokeStyle =
+        "rgba(255,115,115,.8)";
+
+
+    ctx.lineWidth = 2;
+
+
+    const steps = 60;
+
+
+    for (
+        let i = 0;
+        i <= steps;
+        i++
+    ) {
+
+        const t =
+            theory.t
+            *
+            i
+            /
+            steps;
+
+
+        const x =
+            edgeX
+            +
+            theory.v0
+            *
+            t
+            *
+            ramp.scale;
+
+
+        const y =
+            edgeY
+            +
+            .5
+            *
+            g
+            *
+            t
+            *
+            t
+            *
+            ramp.scale;
+
+
+        if (
+            i === 0
+        ) {
+
+            ctx.moveTo(
+                x,
+                y
+            );
+
+        } else {
+
+            ctx.lineTo(
+                x,
+                y
+            );
+
+        }
+
+    }
+
+
+    ctx.stroke();
+
+
+    ctx.setLineDash([]);
+
+
+    ctx.restore();
+
+}
+
+
+// ============================================================
+// IMPACTOS
+// ============================================================
+
+function drawImpacts(
+    ramp
+) {
+
+    impacts.forEach(
+        impact => {
+
+            const x =
+                ramp.endX
+                +
+                impact.R
+                *
+                ramp.scale;
+
+
+            const y =
+                ramp.groundY;
+
+
+            /*
+             * Área de interacción
+             */
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                14,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle =
+                "rgba(255,70,90,.08)";
+
+            ctx.fill();
+
+
+            /*
+             * Punto
+             */
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                5,
+                0,
+                Math.PI * 2
+            );
+
+
+            ctx.fillStyle =
+                "#ff4f5e";
+
+
+            ctx.shadowColor =
+                "#ff4f5e";
+
+
+            ctx.shadowBlur = 12;
+
+
+            ctx.fill();
+
+
+            ctx.shadowBlur = 0;
+
+
+            /*
+             * Número
+             */
+
+            ctx.fillStyle =
+                "#ff9ba4";
+
+
+            ctx.font =
+                "bold 12px Segoe UI";
+
+
+            ctx.textAlign =
+                "center";
+
+
+            ctx.fillText(
+                "#" + impact.id,
+                x,
+                y - 12
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// ESCENA COMPLETA
+// ============================================================
+
+function drawScene() {
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    drawBackground();
+
+
+    const ramp =
+        getRampPoints();
+
+
+    currentRamp =
+        ramp;
+
+
+    drawGround(
+        ramp
+    );
+
+
+    drawTable(
+        ramp
+    );
+
+
+    drawRamp(
+        ramp
+    );
+
+
+    /*
+     * Trayectoria actual
+     */
+
+    drawTrajectory(
+        ramp
+    );
+
+
+    /*
+     * Impactos anteriores
+     */
+
+    drawImpacts(
+        ramp
+    );
+
+
+    /*
+     * Canica inicial
+     */
+
+    if (
+        !isAnimating
+        &&
+        phase === 0
+    ) {
+
+        const p =
+            getBezierPoint(
+                0,
+                ramp
+            );
+
+
+        drawMarble(
+            p.x,
+            p.y - 9
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// AGREGAR FILA
+// ============================================================
+
+function addTableRow(
+    impact
+) {
+
+    const tbody =
+        document.getElementById(
+            "dataBody"
+        );
+
+
+    /*
+     * Eliminar mensaje inicial
+     */
+
+    const empty =
+        tbody.querySelector(
+            ".empty-table"
+        );
+
+
+    if (empty) {
+
+        tbody.innerHTML = "";
+
+    }
+
+
+    const tr =
+        document.createElement(
+            "tr"
+        );
+
+
+    tr.innerHTML = `
+
+        <td>${impact.id}</td>
+
+        <td>${impact.H.toFixed(2)}</td>
+
+        <td>${impact.h.toFixed(2)}</td>
+
+        <td>${impact.L.toFixed(2)}</td>
+
+        <td>${impact.mu.toFixed(2)}</td>
+
+        <td>
+            ${impact.friction ? "Sí" : "No"}
+        </td>
+
+        <td>
+            ${impact.theta.toFixed(2)}
+        </td>
+
+        <td>
+            ${impact.S.toFixed(3)}
+        </td>
+
+        <td>
+            ${impact.v.toFixed(2)}
+        </td>
+
+        <td>
+            ${impact.t.toFixed(2)}
+        </td>
+
+        <td>
+            <strong>
+                ${impact.R.toFixed(3)}
+            </strong>
+        </td>
+
+    `;
+
+
+    tbody.appendChild(
+        tr
+    );
+
+}
+
+
+// ============================================================
+// GUARDAR IMPACTO
+// ============================================================
+
+function guardarImpacto(
+    theory
+) {
+
+    const impact = {
+
+        id:
+            impacts.length + 1,
+
+        H:
+            theory.H,
+
+        h:
+            theory.h,
+
+        L:
+            theory.L,
+
+        mu:
+            theory.mu,
+
+        friction:
+            theory.friction,
+
+        theta:
+            theory.thetaDegrees,
+
+        S:
+            theory.S,
+
+        v:
+            theory.v0,
+
+        t:
+            theory.t,
+
+        R:
+            theory.R
+
+    };
+
+
+    impacts.push(
+        impact
+    );
+
+
+    addTableRow(
+        impact
+    );
+
+}
+
+
+// ============================================================
+// BORRAR TODO
+// ============================================================
+
+function borrarDatos() {
+
+    /*
+     * Impactos
+     */
+
+    impacts = [];
+
+
+    /*
+     * Tabla
+     */
+
+    const tbody =
+        document.getElementById(
+            "dataBody"
+        );
+
+
+    tbody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="11"
+                class="empty-table"
+            >
+
+                Todavía no hay lanzamientos.
+                Realiza una simulación para
+                agregar datos.
+
+            </td>
+
+        </tr>
+
+    `;
+
+
+    /*
+     * Gráfica
+     */
+
+    limpiarGrafica();
+
+
+    /*
+     * Redibujar
+     */
+
+    drawScene();
+
+}
+
+
+// ============================================================
+// SIMULACIÓN
+// ============================================================
+
+function iniciarSimulacion() {
+
+    if (
+        isAnimating
+    ) {
+
+        return;
+
+    }
+
+
+    isAnimating = true;
+
+    phase = 1;
+
+    time = 0;
+
+
+    const theory =
+        calcularTeoria();
+
+
+    /*
+     * Capturamos la geometría
+     * correspondiente a este lanzamiento.
+     */
+
+    const ramp =
+        getRampPoints();
+
+
+    const rampDuration =
+        1.5;
+
+
+    let lastTimestamp =
+        null;
+
+
+    function animate(
+        timestamp
+    ) {
+
+        if (
+            !lastTimestamp
+        ) {
+
+            lastTimestamp =
+                timestamp;
+
+        }
+
+
+        const dt =
+            (
+                timestamp
+                -
+                lastTimestamp
+            )
+            /
+            1000;
+
+
+        lastTimestamp =
+            timestamp;
+
+
+        time +=
+            dt
+            *
+            .65;
+
+
+        drawScene();
+
+
+        /*
+         * ================================================
+         * RAMPA
+         * ================================================
+         */
+
+        if (
+            phase === 1
+        ) {
+
+            if (
+                time
+                <
+                rampDuration
+            ) {
+
+                const progress =
+                    time
+                    /
+                    rampDuration;
+
+
+                const curveT =
+                    progress
+                    *
+                    progress;
+
+
+                const p =
+                    getBezierPoint(
+                        curveT,
+                        ramp
+                    );
+
+
+                drawMarble(
+                    p.x,
+                    p.y - 9
+                );
+
+            }
+
+            else {
+
+                phase = 2;
+
+                time = 0;
+
+            }
+
+        }
+
+
+        /*
+         * ================================================
+         * VUELO
+         * ================================================
+         */
+
+        else if (
+            phase === 2
+        ) {
+
+            if (
+                time
+                <
+                theory.t
+            ) {
+
+                const x =
+
+                    ramp.endX
+                    +
+                    theory.v0
+                    *
+                    time
+                    *
+                    ramp.scale;
+
+
+                const y =
+
+                    ramp.endY
+                    +
+                    .5
+                    *
+                    g
+                    *
+                    time
+                    *
+                    time
+                    *
+                    ramp.scale;
+
+
+                drawMarble(
+                    x,
+                    y - 9
+                );
+
+            }
+
+            else {
+
+                /*
+                 * =========================================
+                 * IMPACTO
+                 * =========================================
+                 */
+
+                isAnimating = false;
+
+                phase = 0;
+
+
+                /*
+                 * Guardar exactamente el alcance
+                 * de ESTE lanzamiento.
+                 */
+
+                guardarImpacto(
+                    theory
+                );
+
+
+                drawScene();
+
+
+                /*
+                 * Mostrar texto temporal
+                 */
+
+                const impactX =
+                    ramp.endX
+                    +
+                    theory.R
+                    *
+                    ramp.scale;
+
+
+                const impactY =
+                    ramp.groundY;
+
+
+                ctx.fillStyle =
+                    "#ff8b94";
+
+
+                ctx.font =
+                    "bold 13px Segoe UI";
+
+
+                ctx.textAlign =
+                    "center";
+
+
+                ctx.fillText(
+                    "IMPACTO #" +
+                    impacts.length,
+                    impactX,
+                    impactY - 23
+                );
+
+
+                return;
+
+            }
+
+        }
+
+
+        requestAnimationFrame(
+            animate
+        );
+
+    }
+
+
+    requestAnimationFrame(
+        animate
+    );
+
+}
+
+
+// ============================================================
+// TOOLTIP DE IMPACTOS
+// ============================================================
+
+canvas.addEventListener(
+    "mousemove",
+    function(event) {
+
+        if (
+            impacts.length === 0
+        ) {
+
+            tooltip.style.display =
+                "none";
+
+            return;
+
+        }
+
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        /*
+         * Conversión de coordenadas
+         * reales del mouse al canvas.
+         */
+
+        const mouseX =
+            (
+                event.clientX
+                -
+                rect.left
+            )
+            *
+            (
+                canvas.width
+                /
+                rect.width
+            );
+
+
+        const mouseY =
+            (
+                event.clientY
+                -
+                rect.top
+            )
+            *
+            (
+                canvas.height
+                /
+                rect.height
+            );
+
+
+        const ramp =
+            currentRamp
+            ||
+            getRampPoints();
+
+
+        let found =
+            null;
+
+
+        for (
+            let i = impacts.length - 1;
+            i >= 0;
+            i--
+        ) {
+
+            const impact =
+                impacts[i];
+
+
+            const x =
+                ramp.endX
+                +
+                impact.R
+                *
+                ramp.scale;
+
+
+            const y =
+                ramp.groundY;
+
+
+            const dx =
+                mouseX - x;
+
+
+            const dy =
+                mouseY - y;
+
+
+            const distance =
+                Math.sqrt(
+                    dx * dx +
+                    dy * dy
+                );
+
+
+            if (
+                distance <= 16
+            ) {
+
+                found =
+                    impact;
+
+                break;
+
+            }
+
+        }
+
+
+        if (
+            found
+        ) {
+
+            tooltip.innerHTML = `
+
+                <div class="tooltip-title">
+
+                    📍 Impacto #${found.id}
+
+                </div>
+
+
+                <div class="tooltip-row">
+
+                    <span>Altura H</span>
+
+                    <span>
+                        ${found.H.toFixed(2)} m
+                    </span>
+
+                </div>
+
+
+                <div class="tooltip-row">
+
+                    <span>Altura h</span>
+
+                    <span>
+                        ${found.h.toFixed(2)} m
+                    </span>
+
+                </div>
+
+
+                <div class="tooltip-row">
+
+                    <span>Longitud L</span>
+
+                    <span>
+                        ${found.L.toFixed(2)} m
+                    </span>
+
+                </div>
+
+
+                <div class="tooltip-row">
+
+                    <span>Fricción</span>
+
+                    <span>
+                        ${found.friction ? "Sí" : "No"}
+                    </span>
+
+                </div>
+
+
+                <div class="tooltip-row">
+
+                    <span>μₖ</span>
+
+                    <span>
+                        ${found.mu.toFixed(2)}
+                    </span>
+
+                </div>
+
+
+                <div class="tooltip-row">
+
+                    <span>θprom</span>
+
+                    <span>
+                        ${found.theta.toFixed(2)}°
+                    </span>
+
+                </div>
+
+
+                <div class="tooltip-row">
+
+                    <span>S</span>
+
+                    <span>
+                        ${found.S.toFixed(3)} m
+                    </span>
+
+                </div>
+
+
+                <div class="tooltip-row">
+
+                    <span>v₀</span>
+
+                    <span>
+                        ${found.v.toFixed(2)} m/s
+                    </span>
+
+                </div>
+
+
+                <div class="tooltip-row">
+
+                    <span>Tiempo</span>
+
+                    <span>
+                        ${found.t.toFixed(2)} s
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="tooltip-row"
+                    style="
+                        margin-top:5px;
+                        border-top:
+                        1px solid
+                        rgba(100,210,255,.2);
+                        padding-top:7px;
+                    "
+                >
+
+                    <span>
+                        Alcance R
+                    </span>
+
+                    <span>
+                        ${found.R.toFixed(3)} m
+                    </span>
+
+                </div>
+
+            `;
+
+
+            tooltip.style.display =
+                "block";
+
+
+            tooltip.style.left =
+                (
+                    event.clientX + 18
+                )
+                +
+                "px";
+
+
+            tooltip.style.top =
+                (
+                    event.clientY + 18
+                )
+                +
+                "px";
+
+
+            canvas.style.cursor =
+                "pointer";
+
+        }
+
+        else {
+
+            tooltip.style.display =
+                "none";
+
+
+            canvas.style.cursor =
+                "crosshair";
+
+        }
+
+    }
+);
+
+
+canvas.addEventListener(
+    "mouseleave",
+    function() {
+
+        tooltip.style.display =
+            "none";
+
+        canvas.style.cursor =
+            "crosshair";
+
+    }
+);
+
+
+// ============================================================
+// VARIABLES DE GRÁFICA
+// ============================================================
+
+const variableNames = {
+
+    H:
+        "Altura de la mesa H (m)",
+
+    h:
+        "Altura de la rampa h (m)",
+
+    L:
+        "Longitud de la base L (m)",
+
+    mu:
+        "Coeficiente de fricción μₖ",
+
+    theta:
+        "Ángulo promedio θprom (°)",
+
+    S:
+        "Longitud de rampa S (m)",
+
+    v:
+        "Velocidad de salida v₀ (m/s)",
+
+    t:
+        "Tiempo de vuelo t (s)",
+
+    R:
+        "Alcance horizontal R (m)"
+
+};
+
+
+// ============================================================
+// OBTENER VALOR DE GRÁFICA
+// ============================================================
+
+function getVariableValue(
+    impact,
+    variable
+) {
+
+    return impact[variable];
+
+}
+
+
+// ============================================================
+// LIMPIAR GRÁFICA
+// ============================================================
+
+function limpiarGrafica() {
+
+    graphCtx.clearRect(
+        0,
+        0,
+        graphCanvas.width,
+        graphCanvas.height
+    );
+
+
+    graphCtx.fillStyle =
+        "#071722";
+
+
+    graphCtx.fillRect(
+        0,
+        0,
+        graphCanvas.width,
+        graphCanvas.height
+    );
+
+
+    const message =
+        document.getElementById(
+            "graphMessage"
+        );
+
+
+    message.style.display =
+        "block";
+
+}
+
+
+// ============================================================
+// GRAFICAR
+// ============================================================
+
+function dibujarGrafica() {
+
+    const message =
+        document.getElementById(
+            "graphMessage"
+        );
+
+
+    if (
+        impacts.length < 1
+    ) {
+
+        limpiarGrafica();
+
+        return;
+
+    }
+
+
+    message.style.display =
+        "none";
+
+
+    const xVariable =
+        document.getElementById(
+            "xVariable"
+        ).value;
+
+
+    const yVariable =
+        document.getElementById(
+            "yVariable"
+        ).value;
+
+
+    const points =
+        impacts.map(
+            impact => ({
+
+                x:
+                    getVariableValue(
+                        impact,
+                        xVariable
+                    ),
+
+                y:
+                    getVariableValue(
+                        impact,
+                        yVariable
+                    ),
+
+                id:
+                    impact.id
+
+            })
+        );
+
+
+    drawGraph(
+        points,
+        xVariable,
+        yVariable
+    );
+
+}
+
+
+// ============================================================
+// DIBUJAR GRÁFICA
+// ============================================================
+
+function drawGraph(
+    points,
+    xVariable,
+    yVariable
+) {
+
+    graphCtx.clearRect(
+        0,
+        0,
+        graphCanvas.width,
+        graphCanvas.height
+    );
+
+
+    const width =
+        graphCanvas.width;
+
+
+    const height =
+        graphCanvas.height;
+
+
+    graphCtx.fillStyle =
+        "#071722";
+
+
+    graphCtx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    /*
+     * Márgenes
+     */
+
+    const left =
+        80;
+
+
+    const right =
+        35;
+
+
+    const top =
+        55;
+
+
+    const bottom =
+        70;
+
+
+    const plotWidth =
+        width
+        -
+        left
+        -
+        right;
+
+
+    const plotHeight =
+        height
+        -
+        top
+        -
+        bottom;
+
+
+    /*
+     * Valores
+     */
+
+    let xs =
+        points.map(
+            p => p.x
+        );
+
+
+    let ys =
+        points.map(
+            p => p.y
+        );
+
+
+    let minX =
+        Math.min(
+            ...xs
+        );
+
+
+    let maxX =
+        Math.max(
+            ...xs
+        );
+
+
+    let minY =
+        Math.min(
+            ...ys
+        );
+
+
+    let maxY =
+        Math.max(
+            ...ys
+        );
+
+
+    /*
+     * Si todos son iguales,
+     * damos un pequeño rango.
+     */
+
+    if (
+        minX === maxX
+    ) {
+
+        minX -= .5;
+
+        maxX += .5;
+
+    }
+
+
+    if (
+        minY === maxY
+    ) {
+
+        minY -= .5;
+
+        maxY += .5;
+
+    }
+
+
+    /*
+     * Margen adicional
+     */
+
+    const xPadding =
+        (
+            maxX - minX
+        )
+        *
+        .10;
+
+
+    const yPadding =
+        (
+            maxY - minY
+        )
+        *
+        .10;
+
+
+    minX -= xPadding;
+
+    maxX += xPadding;
+
+    minY -= yPadding;
+
+    maxY += yPadding;
+
+
+    /*
+     * Funciones de conversión
+     */
+
+    function mapX(
+        value
+    ) {
+
+        return left
+            +
+            (
+                value - minX
+            )
+            /
+            (
+                maxX - minX
+            )
+            *
+            plotWidth;
+
+    }
+
+
+    function mapY(
+        value
+    ) {
+
+        return top
+            +
+            plotHeight
+            -
+            (
+                value - minY
+            )
+            /
+            (
+                maxY - minY
+            )
+            *
+            plotHeight;
+
+    }
+
+
+    /*
+     * Rejilla horizontal
+     */
+
+    graphCtx.strokeStyle =
+        "rgba(100,200,230,.09)";
+
+
+    graphCtx.lineWidth = 1;
+
+
+    const gridLines = 6;
+
+
+    for (
+        let i = 0;
+        i <= gridLines;
+        i++
+    ) {
+
+        const y =
+            top
+            +
+            plotHeight
+            *
+            i
+            /
+            gridLines;
+
+
+        graphCtx.beginPath();
+
+
+        graphCtx.moveTo(
+            left,
+            y
+        );
+
+
+        graphCtx.lineTo(
+            left + plotWidth,
+            y
+        );
+
+
+        graphCtx.stroke();
+
+    }
+
+
+    /*
+     * Rejilla vertical
+     */
+
+    for (
+        let i = 0;
+        i <= gridLines;
+        i++
+    ) {
+
+        const x =
+            left
+            +
+            plotWidth
+            *
+            i
+            /
+            gridLines;
+
+
+        graphCtx.beginPath();
+
+
+        graphCtx.moveTo(
+            x,
+            top
+        );
+
+
+        graphCtx.lineTo(
+            x,
+            top + plotHeight
+        );
+
+
+        graphCtx.stroke();
+
+    }
+
+
+    /*
+     * Ejes
+     */
+
+    graphCtx.strokeStyle =
+        "#74bdd1";
+
+
+    graphCtx.lineWidth = 2;
+
+
+    graphCtx.beginPath();
+
+
+    graphCtx.moveTo(
+        left,
+        top
+    );
+
+
+    graphCtx.lineTo(
+        left,
+        top + plotHeight
+    );
+
+
+    graphCtx.lineTo(
+        left + plotWidth,
+        top + plotHeight
+    );
+
+
+    graphCtx.stroke();
+
+
+    /*
+     * Título
+     */
+
+    graphCtx.fillStyle =
+        "#8edfff";
+
+
+    graphCtx.font =
+        "bold 17px Segoe UI";
+
+
+    graphCtx.textAlign =
+        "center";
+
+
+    graphCtx.fillText(
+
+        variableNames[xVariable]
+        +
+        "  vs  "
+        +
+        variableNames[yVariable],
+
+        width / 2,
+
+        28
+
+    );
+
+
+    /*
+     * Etiqueta X
+     */
+
+    graphCtx.font =
+        "bold 13px Segoe UI";
+
+
+    graphCtx.fillStyle =
+        "#b8dce8";
+
+
+    graphCtx.fillText(
+
+        variableNames[xVariable],
+
+        left
+        +
+        plotWidth / 2,
+
+        height - 18
+
+    );
+
+
+    /*
+     * Etiqueta Y
+     */
+
+    graphCtx.save();
+
+
+    graphCtx.translate(
+        20,
+        top
+        +
+        plotHeight / 2
+    );
+
+
+    graphCtx.rotate(
+        -Math.PI / 2
+    );
+
+
+    graphCtx.fillText(
+        variableNames[yVariable],
+        0,
+        0
+    );
+
+
+    graphCtx.restore();
+
+
+    /*
+     * Números X
+     */
+
+    graphCtx.font =
+        "11px Segoe UI";
+
+
+    graphCtx.fillStyle =
+        "#91b5c8";
+
+
+    graphCtx.textAlign =
+        "center";
+
+
+    for (
+        let i = 0;
+        i <= gridLines;
+        i++
+    ) {
+
+        const value =
+            minX
+            +
+            (
+                maxX - minX
+            )
+            *
+            i
+            /
+            gridLines;
+
+
+        const x =
+            left
+            +
+            plotWidth
+            *
+            i
+            /
+            gridLines;
+
+
+        graphCtx.fillText(
+
+            formatGraphNumber(
+                value
+            ),
+
+            x,
+
+            top
+            +
+            plotHeight
+            +
+            20
+
+        );
+
+    }
+
+
+    /*
+     * Números Y
+     */
+
+    graphCtx.textAlign =
+        "right";
+
+
+    for (
+        let i = 0;
+        i <= gridLines;
+        i++
+    ) {
+
+        const value =
+            maxY
+            -
+            (
+                maxY - minY
+            )
+            *
+            i
+            /
+            gridLines;
+
+
+        const y =
+            top
+            +
+            plotHeight
+            *
+            i
+            /
+            gridLines;
+
+
+        graphCtx.fillText(
+
+            formatGraphNumber(
+                value
+            ),
+
+            left - 10,
+
+            y + 4
+
+        );
+
+    }
+
+
+    /*
+     * Línea que conecta los puntos
+     */
+
+    const sorted =
+        [...points].sort(
+            (
+                a,
+                b
+            ) =>
+                a.x - b.x
+        );
+
+
+    if (
+        sorted.length > 1
+    ) {
+
+        graphCtx.beginPath();
+
+
+        sorted.forEach(
+            (
+                point,
+                index
+            ) => {
+
+                const x =
+                    mapX(
+                        point.x
+                    );
+
+
+                const y =
+                    mapY(
+                        point.y
+                    );
+
+
+                if (
+                    index === 0
+                ) {
+
+                    graphCtx.moveTo(
+                        x,
+                        y
+                    );
+
+                } else {
+
+                    graphCtx.lineTo(
+                        x,
+                        y
+                    );
+
+                }
+
+            }
+        );
+
+
+        graphCtx.strokeStyle =
+            "rgba(70,205,255,.45)";
+
+
+        graphCtx.lineWidth = 2;
+
+
+        graphCtx.stroke();
+
+    }
+
+
+    /*
+     * Puntos
+     */
+
+    points.forEach(
+        point => {
+
+            const x =
+                mapX(
+                    point.x
+                );
+
+
+            const y =
+                mapY(
+                    point.y
+                );
+
+
+            /*
+             * Aura
+             */
+
+            graphCtx.beginPath();
+
+
+            graphCtx.arc(
+                x,
+                y,
+                9,
+                0,
+                Math.PI * 2
+            );
+
+
+            graphCtx.fillStyle =
+                "rgba(60,215,255,.12)";
+
+
+            graphCtx.fill();
+
+
+            /*
+             * Punto
+             */
+
+            graphCtx.beginPath();
+
+
+            graphCtx.arc(
+                x,
+                y,
+                5,
+                0,
+                Math.PI * 2
+            );
+
+
+            graphCtx.fillStyle =
+                "#42d9ff";
+
+
+            graphCtx.shadowColor =
+                "#42d9ff";
+
+
+            graphCtx.shadowBlur = 9;
+
+
+            graphCtx.fill();
+
+
+            graphCtx.shadowBlur = 0;
+
+
+            /*
+             * Número
+             */
+
+            graphCtx.fillStyle =
+                "#a6eaff";
+
+
+            graphCtx.font =
+                "bold 11px Segoe UI";
+
+
+            graphCtx.textAlign =
+                "center";
+
+
+            graphCtx.fillText(
+                "#" + point.id,
+                x,
+                y - 11
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// FORMATO DE NÚMEROS
+// ============================================================
+
+function formatGraphNumber(
+    value
+) {
+
+    const abs =
+        Math.abs(
+            value
+        );
+
+
+    if (
+        abs >= 100
+    ) {
+
+        return value.toFixed(0);
+
+    }
+
+
+    if (
+        abs >= 10
+    ) {
+
+        return value.toFixed(1);
+
+    }
+
+
+    return value.toFixed(2);
+
+}
+
+
+// ============================================================
+// EVENTOS
+// ============================================================
+
+inputs.h.addEventListener(
+    "input",
+    updateDisplays
+);
+
+
+inputs.L.addEventListener(
+    "input",
+    updateDisplays
+);
+
+
+inputs.H.addEventListener(
+    "input",
+    updateDisplays
+);
+
+
+inputs.mu.addEventListener(
+    "input",
+    updateDisplays
+);
+
+
+// ============================================================
+// FRICCIÓN
+// ============================================================
+
+inputs.friction.addEventListener(
+    "change",
+    function() {
+
+        const container =
+            document.getElementById(
+                "mu_container"
+            );
+
+
+        if (
+            this.checked
+        ) {
+
+            container.classList.remove(
+                "disabled"
+            );
+
+        } else {
+
+            container.classList.add(
+                "disabled"
+            );
+
+        }
+
+
+        updateDisplays();
+
+    }
+);
+
+
+// ============================================================
+// CAMBIO DE VARIABLES DE GRÁFICA
+// ============================================================
+
+document
+    .getElementById("xVariable")
+    .addEventListener(
+        "change",
+        function() {
+
+            if (
+                impacts.length > 0
+            ) {
+
+                dibujarGrafica();
+
+            }
+
+        }
+    );
+
+
+document
+    .getElementById("yVariable")
+    .addEventListener(
+        "change",
+        function() {
+
+            if (
+                impacts.length > 0
+            ) {
+
+                dibujarGrafica();
+
+            }
+
+        }
+    );
+
+
+// ============================================================
+// INICIO
+// ============================================================
+
+limpiarGrafica();
+
+updateDisplays();
+
+</script>
+
+
+</body>
+
+</html>
